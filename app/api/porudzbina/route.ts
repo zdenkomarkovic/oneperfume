@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { sendMail } from "@/lib/mail";
+import { customerConfirmationHtml, customerConfirmationText } from "@/lib/mail-templates";
 import { formatPrice, getProduct, unitPrice } from "@/lib/products";
 
 const schema = z.object({
@@ -22,11 +23,13 @@ export async function POST(req: Request) {
   // Cene se uvek računaju na serveru, ne veruje se klijentu.
   let total = 0;
   const lines: string[] = [];
+  const rows: { qty: number; title: string; price: string }[] = [];
   for (const it of d.items) {
     const p = getProduct(it.slug);
     if (!p || p.soldOut) return NextResponse.json({ error: `Proizvod nije dostupan: ${it.slug}` }, { status: 400 });
     const price = unitPrice(p, it.variant);
     total += price * it.qty;
+    rows.push({ qty: it.qty, title: `${p.brand} ${p.name} ${it.variant ?? p.volume}`, price: formatPrice(price * it.qty) });
     lines.push(`${it.qty} × ${p.brand} ${p.name} ${it.variant ?? p.volume} – ${formatPrice(price * it.qty)}`);
   }
 
@@ -43,5 +46,15 @@ export async function POST(req: Request) {
   ].join("\n");
 
   const ok = await sendMail(`Nova porudžbina – ${d.name}`, text, d.email);
+
+  // Potvrda kupcu – greška ovde ne sme da obori porudžbinu koja je već stigla vlasniku.
+  if (ok) {
+    const mail = { name: d.name, rows, total: formatPrice(total), address: `${d.address}, ${d.zip} ${d.city}` };
+    await sendMail("Primili smo vašu porudžbinu – One Perfume", customerConfirmationText(mail), undefined, {
+      to: d.email,
+      html: customerConfirmationHtml(mail),
+    }).catch((e) => console.error("[mail:confirm]", e));
+  }
+
   return NextResponse.json({ ok, total }, { status: ok ? 200 : 502 });
 }

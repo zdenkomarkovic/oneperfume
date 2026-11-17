@@ -4,13 +4,19 @@ import "server-only";
  * Šalje email preko Mailjet-a. Ako env varijable nisu ispravno podešene
  * (npr. u razvoju), poruka se samo loguje u konzolu i vraća se uspeh.
  */
-export async function sendMail(subject: string, text: string, replyTo?: string): Promise<boolean> {
+export async function sendMail(
+  subject: string,
+  text: string,
+  replyTo?: string,
+  opts: { to?: string; html?: string } = {},
+): Promise<boolean> {
   const key = process.env.MAILJET_API_KEY;
   const secret = process.env.MAILJET_SECRET_KEY;
   const from = process.env.SITE_MAIL_SENDER?.trim();
-  const to = process.env.SITE_MAIL_RECEIVER?.trim();
+  const receiver = process.env.SITE_MAIL_RECEIVER?.trim();
+  const to = opts.to ?? receiver;
 
-  if (!key || !secret || !from || !to || to.startsWith("@")) {
+  if (!key || !secret || !from || !receiver || receiver.startsWith("@") || !to) {
     console.log("[mail:dev]", subject, "\n" + text);
     return true;
   }
@@ -29,6 +35,7 @@ export async function sendMail(subject: string, text: string, replyTo?: string):
           ...(replyTo && { ReplyTo: { Email: replyTo } }),
           Subject: subject,
           TextPart: text,
+          ...(opts.html && { HTMLPart: opts.html }),
         },
       ],
     }),
