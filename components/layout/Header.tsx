@@ -51,7 +51,7 @@ export function Header() {
 
           <nav className="hidden items-center gap-9 lg:flex" aria-label="Glavna navigacija">
             {nav.map((n) => (
-              <Link key={n.href} href={n.href} className="text-[0.74rem] font-medium uppercase tracking-[0.2em] text-ink/80 transition-colors hover:text-gold">
+              <Link key={n.href} href={n.href} className="nav-link text-[0.74rem] font-medium uppercase tracking-[0.2em] text-ink/80 transition-colors hover:text-gold">
                 {n.label}
               </Link>
             ))}
@@ -64,7 +64,7 @@ export function Header() {
             </svg>
             <span className="hidden sm:inline">Korpa</span>
             {count > 0 && (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-gold px-1 text-[0.65rem] font-bold text-bg">{count}</span>
+              <span key={count} className="pop flex h-5min-w-5 items-center justify-center rounded-full bg-gold px-1 text-[0.65rem] font-bold text-bg">{count}</span>
             )}
           </button>
         </div>

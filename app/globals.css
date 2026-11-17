@@ -172,3 +172,162 @@ body::after {
 .spin-slow { animation: spin-slow 120s linear infinite; }
 .mist { animation: mist 9s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .float-y, .spin-slow, .mist { animation: none; } }
+
+/* ── Simpatične animacije ── */
+
+/* Otkrivanje pri skrolu */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.9s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Dugme: sjaj koji prelazi preko i blagi "lift" */
+.btn {
+  position: relative;
+  overflow: hidden;
+}
+.btn:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(232, 223, 207, 0.15);
+}
+.btn:not(:disabled):active {
+  transform: translateY(0) scale(0.97);
+}
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.45) 50%, transparent 65%);
+  transform: translateX(-120%);
+}
+.btn:not(:disabled):hover::after {
+  transform: translateX(120%);
+  transition: transform 0.7s ease;
+}
+
+/* Pulsiranje glavnog dugmeta u heroju */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 223, 207, 0.35); }
+  50% { box-shadow: 0 0 0 12px rgba(232, 223, 207, 0); }
+}
+.glow-pulse { animation: glow-pulse 2.8s ease-out infinite; }
+
+/* Iskrice koje lebde */
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: translateY(0) scale(0.4) rotate(0); }
+  50% { opacity: 0.9; transform: translateY(-26px) scale(1) rotate(90deg); }
+}
+.sparkle {
+  position: absolute;
+  color: var(--color-gold);
+  animation: sparkle 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Blagi nagib okvira hero slike */
+@keyframes sway {
+  0%, 100% { transform: rotate(-1.2deg); }
+  50% { transform: rotate(1.2deg); }
+}
+.sway { animation: sway 8s ease-in-out infinite; transform-origin: 50% 100%; }
+
+/* Podvlačenje linka u navigaciji */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 1px;
+  background: var(--color-gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* Bedž korpe "iskoči" kad se broj promeni */
+@keyframes pop {
+  0% { transform: scale(0.4); }
+  60% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+.pop { animation: pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1); }
+
+/* Kartica proizvoda: lagano podizanje i sjaj */
+.card-lift { transition: transform 0.4s ease; }
+.card-lift:hover { transform: translateY(-6px); }
+.card-lift .card-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 40%, rgba(255, 255, 255, 0.18) 50%, transparent 60%);
+  transform: translateX(-130%);
+  pointer-events: none;
+}
+.card-lift:hover .card-img::after {
+  transform: translateX(130%);
+  transition: transform 0.9s ease;
+}
+
+/* "+ Dodaj" mali poskok na hover */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-6deg) scale(1.08); }
+  75% { transform: rotate(6deg) scale(1.08); }
+}
+.add-btn:hover { animation: wiggle 0.5s ease; }
+
+/* Strelica koja se pomera */
+.arrow-slide { display: inline-block; transition: transform 0.3s ease; }
+a:hover > .arrow-slide, .group:hover .arrow-slide { transform: translateX(6px); }
+
+/* Brend čipovi */
+.chip { transition: all 0.3s ease; }
+.chip:hover { transform: translateY(-3px) rotate(-1deg); background: rgba(232, 223, 207, 0.08); }
+
+/* Marquee pauza na hover */
+.marquee:hover { animation-play-state: paused; }
+
+/* Veliki ✦ u CTA polako rotira */
+.spin-star { animation: spin-slow 40s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .glow-pulse, .sparkle, .sway, .pop, .add-btn:hover, .spin-star { animation: none; }
+  .btn::after, .card-lift .card-img::after { display: none; }
+  .card-lift:hover, .chip:hover, .btn:not(:disabled):hover { transform: none; }
+}
+
+/* Lightbox */
+@keyframes lightbox-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes lightbox-img { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+.lightbox-in { animation: lightbox-in 0.25s ease both; }
+.lightbox-img { animation: lightbox-img 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@media (prefers-reduced-motion: reduce) { .lightbox-in, .lightbox-img { animation: none; } }
+
+/* Paginacija */
+.pg {
+  min-width: 2.75rem;
+  height: 2.75rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--color-line);
+  font-size: 0.85rem;
+  transition: all 0.25s ease;
+}
+.pg:hover:not(:disabled) { border-color: var(--color-gold); color: var(--color-gold); transform: translateY(-2px); }
+.pg:disabled { opacity: 0.3; cursor: not-allowed; }
+.pg-on { background: var(--color-gold); color: #0c0a09; border-color: var(--color-gold); }
+.pg-on:hover:not(:disabled) { color: #0c0a09 !important; }

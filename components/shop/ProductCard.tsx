@@ -8,8 +8,8 @@ import { priceLabel, type Product } from "@/lib/products";
 export function ProductCard({ product: p, priority = false }: { product: Product; priority?: boolean }) {
   const { add } = useCart();
   return (
-    <article className="group flex flex-col">
-      <Link href={`/proizvod/${p.slug}`} className="relative block aspect-square overflow-hidden bg-surface-2">
+    <article className="group card-lift flex flex-col">
+      <Link href={`/proizvod/${p.slug}`} className="card-img relative block aspect-square overflow-hidden bg-surface-2">
         <Image
           src={p.image}
           alt={`${p.brand} ${p.name}`}
@@ -41,7 +41,7 @@ export function ProductCard({ product: p, priority = false }: { product: Product
           ) : (
             <button
               onClick={() => add(p.slug)}
-              className="text-[0.7rem] font-semibold uppercase tracking-widest text-gold transition-colors hover:text-gold-soft"
+              className="add-btn text-[0.7rem] font-semibold uppercase tracking-widest text-gold transition-colors hover:text-gold-soft"
             >
               + Dodaj
             </button>

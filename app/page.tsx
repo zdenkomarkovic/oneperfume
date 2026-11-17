@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { Reveal } from "@/components/ui/Reveal";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { SITE_URL } from "@/lib/constants";
 import { SHOP, bestSellers, brandSlug, brands, getProduct, products } from "@/lib/products";
@@ -46,6 +47,14 @@ const perks = [
   ["Lična podrška", "Pozovite nas ili pišite – savetujemo"],
 ];
 
+const sparkles = [
+  { c: "left-[8%] top-[6%]", d: "0s", s: "1.1rem" },
+  { c: "right-[10%] top-[2%]", d: "1.4s", s: "0.8rem" },
+  { c: "left-[2%] top-[55%]", d: "2.6s", s: "0.9rem" },
+  { c: "right-[2%] top-[62%]", d: "3.4s", s: "1.2rem" },
+  { c: "left-[40%] bottom-[0%]", d: "0.8s", s: "0.8rem" },
+];
+
 const heroNotes = [
   { t: "Oud", c: "left-[2%] top-[18%]", d: "0s" },
   { t: "Vanilija", c: "right-[0%] top-[28%]", d: "1.2s" },
@@ -74,14 +83,14 @@ export default function HomePage() {
               Mirisom ispričana priča – od arapskih klasika do dizajnerskih brendova. Pronađite svoj potpis.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
-              <Link href="/parfemi" className="btn btn-gold">Pogledaj parfeme</Link>
+              <Link href="/parfemi" className="btn btn-gold glow-pulse">Pogledaj parfeme</Link>
               <Link href="/o-nama" className="btn btn-ghost">O nama</Link>
             </div>
           </div>
 
           <div className="fade-up relative mx-auto flex w-full max-w-md items-center justify-center py-6 lg:max-w-lg" style={{ animationDelay: "0.15s" }}>
             <div className="relative w-[78%] max-w-sm">
-              <div className="absolute -inset-3 rounded-t-[999px] border border-gold/30" aria-hidden />
+              <div className="sway absolute -inset-3 rounded-t-[999px] border border-gold/30" aria-hidden />
               <div className="relative aspect-[722/1000] overflow-hidden rounded-t-[999px] shadow-[0_40px_80px_rgba(0,0,0,0.6)]">
                 <Image
                   src="/2151890511.jpg"
@@ -94,6 +103,9 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-bg/50 via-transparent to-transparent" />
               </div>
             </div>
+            {sparkles.map((s, i) => (
+              <span key={i} aria-hidden className={`sparkle ${s.c}`} style={{ animationDelay: s.d, fontSize: s.s }}>✦</span>
+            ))}
             {heroNotes.map((n) => (
               <span
                 key={n.t}
@@ -121,18 +133,20 @@ export default function HomePage() {
       {/* Categories */}
       <section className="container-x mt-28">
         <div className="grid gap-5 md:grid-cols-3">
-          {categories.map((c) => {
+          {categories.map((c, i) => {
             const p = getProduct(c.slug)!;
             return (
-              <Link key={c.href} href={c.href} className="group relative flex aspect-[4/5] items-end overflow-hidden bg-surface-2 p-8">
+              <Reveal key={c.href} delay={i * 120}>
+              <Link href={c.href} className="group relative flex aspect-[4/5] items-end overflow-hidden bg-surface-2 p-8">
                 <Image src={p.image} alt="" fill sizes="(min-width:768px) 33vw, 100vw" className="object-cover transition duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-bg/90 from-0% via-bg/30 via-40% to-transparent to-65%" />
                 <div className="relative">
                   <h3 className="font-serif text-4xl">{c.title}</h3>
                   <p className="mt-1 text-sm text-muted">{c.sub}</p>
-                  <span className="mt-4 inline-block text-xs font-semibold uppercase tracking-[0.2em] text-gold">Istraži →</span>
+                  <span className="mt-4 inline-block text-xs font-semibold uppercase tracking-[0.2em] text-gold">Istraži <span className="arrow-slide">→</span></span>
                 </div>
               </Link>
+              </Reveal>
             );
           })}
         </div>
@@ -141,18 +155,22 @@ export default function HomePage() {
       {/* Best sellers */}
       <section className="band-warm relative mt-28 py-24">
        <div className="container-x">
-        <div className="mb-12 flex items-end justify-between gap-6">
+        <Reveal className="mb-12">
+        <div className="flex items-end justify-between gap-6">
           <div>
             <p className="eyebrow">Najprodavanije</p>
             <h2 className="mt-3 font-serif text-5xl md:text-6xl">Best seller</h2>
           </div>
           <Link href="/parfemi" className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-gold hover:text-gold-soft sm:block">
-            Svi parfemi →
+            Svi parfemi <span className="arrow-slide">→</span>
           </Link>
         </div>
+        </Reveal>
         <div className="grid grid-cols-2 gap-x-5 gap-y-12 lg:grid-cols-4">
-          {bestSellers().slice(0, 8).map((p) => (
-            <ProductCard key={p.slug} product={p} />
+          {bestSellers().slice(0, 8).map((p, i) => (
+            <Reveal key={p.slug} delay={(i % 4) * 100}>
+              <ProductCard product={p} />
+            </Reveal>
           ))}
         </div>
        </div>
@@ -162,11 +180,13 @@ export default function HomePage() {
       <section className="bg-paper py-20 text-bg">
         <div className="container-x grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {perks.map(([t, d], i) => (
-            <div key={t} className="border-t border-bg/20 pt-6">
+            <Reveal key={t} delay={i * 120}>
+            <div className="border-t border-bg/20 pt-6">
               <span className="font-serif text-5xl text-bg/25">0{i + 1}</span>
               <h3 className="mt-3 font-serif text-2xl">{t}</h3>
               <p className="mt-2 text-sm text-bg/60">{d}</p>
             </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -181,7 +201,7 @@ export default function HomePage() {
               key={b}
               href={`/parfemi?brend=${encodeURIComponent(b)}`}
               data-slug={brandSlug(b)}
-              className="border border-line px-6 py-3 text-sm transition hover:border-gold hover:text-gold"
+              className="chip border border-line px-6 py-3 text-sm hover:border-gold hover:text-gold"
             >
               {b} <span className="ml-1 text-muted">{products.filter((p) => p.brand === b).length}</span>
             </Link>
@@ -214,7 +234,7 @@ export default function HomePage() {
       {/* CTA */}
       <section className="container-x mt-32">
         <div className="relative overflow-hidden bg-paper px-8 py-24 text-center text-bg">
-          <span aria-hidden className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 select-none whitespace-nowrap font-serif text-[14rem] leading-none text-bg/[0.06]">✦</span>
+          <div aria-hidden className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2"><span className="spin-star block select-none whitespace-nowrap font-serif text-[14rem] leading-none text-bg/[0.06]">✦</span></div>
           <p className="relative text-xs font-semibold uppercase tracking-[0.28em]">Ne znate šta da izaberete?</p>
           <h2 className="relative mx-auto mt-4 max-w-2xl font-serif text-5xl leading-tight">Pomoći ćemo vam da nađete pravi miris</h2>
           <Link href="/kontakt" className="btn relative mt-10 border-bg bg-bg text-gold-soft hover:bg-transparent hover:text-bg">Kontaktirajte nas</Link>
