@@ -15,6 +15,7 @@ const schema = z.object({
   city: z.string().trim().min(2).max(100),
   zip: z.string().trim().min(3).max(10),
   note: z.string().trim().max(1000).optional(),
+  accept: z.literal("on"),
   paymentMethod: z.enum(["pouzece", "kartica"]).default("pouzece"),
   items: z.array(z.object({ slug: z.string(), qty: z.number().int().min(1).max(20), variant: z.string().max(30).optional() })).min(1).max(50),
 });

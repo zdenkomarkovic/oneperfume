@@ -43,6 +43,22 @@ export function Footer({ categories }: { categories: Category[] }) {
         </div>
       </div>
       <div className="border-t border-line">
+        <nav aria-label="Pravne informacije" className="container-x flex flex-wrap gap-x-6 gap-y-2 py-5 text-xs text-muted">
+          <Link className="hover:text-gold" href="/uslovi-koriscenja">Uslovi korišćenja</Link>
+          <Link className="hover:text-gold" href="/politika-privatnosti">Politika privatnosti</Link>
+          <Link className="hover:text-gold" href="/politika-kolacica">Politika kolačića</Link>
+          <Link className="hover:text-gold" href="/reklamacije-i-povracaj">Reklamacije i povraćaj</Link>
+          <Link className="hover:text-gold" href="/isporuka-i-placanje">Isporuka i plaćanje</Link>
+        </nav>
+        <div className="container-x flex flex-wrap items-center gap-3 pb-5 text-[0.65rem] uppercase tracking-widest text-muted">
+          <span>Plaćanje:</span>
+          <span className="border border-line px-2 py-0.5">Visa</span>
+          <span className="border border-line px-2 py-0.5">Mastercard</span>
+          <span className="border border-line px-2 py-0.5">Dina</span>
+          <span className="border border-line px-2 py-0.5">Pouzećem</span>
+        </div>
+      </div>
+      <div className="border-t border-line">
         <div className="container-x flex flex-col justify-between gap-2 py-6 text-xs text-muted md:flex-row">
           <span>© 2026 OnePerfume · PIB {SHOP.company.pib} · MB {SHOP.company.mb}</span>
           <span>

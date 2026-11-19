@@ -120,9 +120,17 @@ export default function CheckoutPage() {
             <span className="eyebrow !text-muted">Ukupno</span>
             <span className="font-serif text-3xl">{formatPrice(total)}</span>
           </div>
-          <p className="mt-4 text-xs text-muted">Pošiljku isporučuje kurirska služba. Cenu dostave obračunava kurir prema svom cenovniku.</p>
+          <p className="mt-4 text-xs text-muted">Cene su u dinarima (RSD). Pošiljku isporučuje kurirska služba, a cenu dostave obračunava kurir prema svom cenovniku i ona nije uključena u iznos iznad. Više u <Link href="/isporuka-i-placanje" className="text-gold underline">Isporuka i plaćanje</Link>.</p>
+          <label className="mt-6 flex cursor-pointer items-start gap-3 text-xs leading-relaxed text-muted">
+            <input type="checkbox" name="accept" required className="mt-0.5 accent-[#e8dfcf]" />
+            <span>
+              Pročitao/la sam i prihvatam <Link href="/uslovi-koriscenja" target="_blank" className="text-gold underline">Uslove korišćenja</Link>,{" "}
+              <Link href="/politika-privatnosti" target="_blank" className="text-gold underline">Politiku privatnosti</Link> i{" "}
+              <Link href="/reklamacije-i-povracaj" target="_blank" className="text-gold underline">uslove povraćaja</Link>.
+            </span>
+          </label>
           <button disabled={state === "sending"} className="btn btn-gold mt-6 w-full">
-            {state === "sending" ? "Slanje…" : method === "kartica" ? "Nastavi na plaćanje" : "Potvrdi porudžbinu"}
+            {state === "sending" ? "Slanje…" : "Poručujem sa obavezom plaćanja"}
           </button>
           {state === "err" && <p className="mt-4 text-sm text-red-400">{errMsg || "Došlo je do greške. Pokušajte ponovo ili nas pozovite."}</p>}
         </aside>

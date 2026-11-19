@@ -32,7 +32,7 @@ export function Header({ categories }: { categories: Category[] }) {
           scrolled ? "border-line bg-bg/90 backdrop-blur-md" : "border-transparent bg-bg"
         }`}
       >
-        <div className="container-x flex h-24 items-center justify-between">
+        <div className="container-x flex h-20 items-center md:h-24 justify-between">
           <button className="lg:hidden" onClick={() => setMenu(true)} aria-label="Meni">
             <span className="block h-px w-6 bg-ink" />
             <span className="mt-2 block h-px w-6 bg-ink" />
@@ -40,7 +40,7 @@ export function Header({ categories }: { categories: Category[] }) {
           </button>
 
           <Link href="/" aria-label="One Perfume – početna" className="shrink-0">
-            <Image src="/logo-dark.png" alt="One Perfume" width={637} height={346} priority className="h-[4.5rem] w-auto" />
+            <Image src="/logo-dark.png" alt="One Perfume" width={637} height={346} priority className="h-16 w-auto md:h-24" />
           </Link>
 
           <nav className="hidden items-center gap-9 lg:flex" aria-label="Glavna navigacija">
