@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "./CartProvider";
-import { priceLabel, type Product } from "@/lib/products";
+import { priceLabel, toCartProduct, type Product } from "@/lib/products";
 
 export function ProductCard({ product: p, priority = false }: { product: Product; priority?: boolean }) {
   const { add } = useCart();
@@ -40,7 +40,7 @@ export function ProductCard({ product: p, priority = false }: { product: Product
             </Link>
           ) : (
             <button
-              onClick={() => add(p.slug)}
+              onClick={() => add(toCartProduct(p))}
               className="add-btn text-[0.7rem] font-semibold uppercase tracking-widest text-gold transition-colors hover:text-gold-soft"
             >
               + Dodaj

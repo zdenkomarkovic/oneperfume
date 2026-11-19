@@ -1,13 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "@/components/shop/CartProvider";
 import { formatPrice } from "@/lib/products";
 
 export default function CheckoutPage() {
   const { lines, total, clear } = useCart();
   const [state, setState] = useState<"idle" | "sending" | "ok" | "err">("idle");
+  const [cardEnabled, setCardEnabled] = useState(false);
+  const [method, setMethod] = useState<"pouzece" | "kartica">("pouzece");
+  const [errMsg, setErrMsg] = useState("");
+
+  useEffect(() => {
+    fetch("/api/placanje/config")
+      .then((r) => r.json())
+      .then((d) => setCardEnabled(!!d.card))
+      .catch(() => {});
+  }, []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -17,12 +27,22 @@ export default function CheckoutPage() {
       const r = await fetch("/api/porudzbina", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, items: lines.map((l) => ({ slug: l.product.slug, qty: l.qty, variant: l.variant })) }),
+        body: JSON.stringify({ ...form, paymentMethod: method, items: lines.map((l) => ({ slug: l.product.slug, qty: l.qty, variant: l.variant })) }),
       });
+      const d = await r.json().catch(() => ({}));
+      if (r.ok && d.redirectUrl) {
+        // Kartica: porudžbina je sačuvana, korpa se prazni, a kupac ide na stranicu za plaćanje.
+        clear();
+        window.location.href = d.redirectUrl;
+        return;
+      }
       if (r.ok) {
         clear();
         setState("ok");
-      } else setState("err");
+      } else {
+        setErrMsg(d.error ?? "");
+        setState("err");
+      }
     } catch {
       setState("err");
     }
@@ -33,7 +53,7 @@ export default function CheckoutPage() {
       <div className="container-x py-32 text-center">
         <p className="eyebrow">Hvala vam</p>
         <h1 className="mt-4 font-serif text-6xl">Porudžbina je primljena</h1>
-        <p className="mx-auto mt-6 max-w-md text-muted">Javićemo vam se uskoro radi potvrde. </p>
+        <p className="mx-auto mt-6 max-w-md text-muted">Javićemo vam se uskoro radi potvrde. Pošiljku šaljemo kurirskom službom, a plaćate kuriru pri preuzimanju.</p>
         <Link href="/parfemi" className="btn btn-gold mt-10">Nastavi kupovinu</Link>
       </div>
     );
@@ -61,6 +81,29 @@ export default function CheckoutPage() {
           <input name="zip" required placeholder="Poštanski broj" className="field" autoComplete="postal-code" />
           <input name="city" required placeholder="Grad" className="field" autoComplete="address-level2" />
           <textarea name="note" rows={4} placeholder="Napomena (opciono)" className="field resize-none sm:col-span-2" />
+
+          <fieldset className="mt-4 sm:col-span-2">
+            <legend className="eyebrow mb-4">Način plaćanja</legend>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {(
+                [
+                  ["pouzece", "Pouzećem", "Plaćate kuriru pri preuzimanju pošiljke"],
+                  ...(cardEnabled ? [["kartica", "Karticom online", "Visa, Mastercard, Dina – bezbedno na stranici banke"]] : []),
+                ] as const
+              ).map(([v, t, d]) => (
+                <label
+                  key={v}
+                  className={`flex cursor-pointer gap-3 border p-4 transition-colors ${method === v ? "border-gold bg-surface" : "border-line hover:border-gold/50"}`}
+                >
+                  <input type="radio" name="pm" checked={method === v} onChange={() => setMethod(v as "pouzece" | "kartica")} className="mt-1 accent-[#e8dfcf]" />
+                  <span>
+                    <span className="block text-sm font-medium">{t}</span>
+                    <span className="block text-xs text-muted">{d}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
         </div>
 
         <aside className="h-fit border border-line bg-surface p-8">
@@ -77,11 +120,11 @@ export default function CheckoutPage() {
             <span className="eyebrow !text-muted">Ukupno</span>
             <span className="font-serif text-3xl">{formatPrice(total)}</span>
           </div>
-          <p className="mt-4 text-xs text-muted">Cena dostave se obračunava pri slanju.</p>
+          <p className="mt-4 text-xs text-muted">Pošiljku isporučuje kurirska služba. Cenu dostave obračunava kurir prema svom cenovniku.</p>
           <button disabled={state === "sending"} className="btn btn-gold mt-6 w-full">
-            {state === "sending" ? "Slanje…" : "Potvrdi porudžbinu"}
+            {state === "sending" ? "Slanje…" : method === "kartica" ? "Nastavi na plaćanje" : "Potvrdi porudžbinu"}
           </button>
-          {state === "err" && <p className="mt-4 text-sm text-red-400">Došlo je do greške. Pokušajte ponovo ili nas pozovite.</p>}
+          {state === "err" && <p className="mt-4 text-sm text-red-400">{errMsg || "Došlo je do greške. Pokušajte ponovo ili nas pozovite."}</p>}
         </aside>
       </form>
     </div>

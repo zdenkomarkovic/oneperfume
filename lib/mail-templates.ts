@@ -5,6 +5,7 @@ export type OrderMail = {
   rows: { qty: number; title: string; price: string }[];
   total: string;
   address: string;
+  payment: string; // npr. "Plaćanje pouzećem kuriru" ili "Plaćeno karticom"
 };
 
 const esc = (s: string) =>
@@ -14,12 +15,12 @@ export function customerConfirmationText(o: OrderMail): string {
   return [
     `Poštovani/a ${o.name},`,
     "",
-    "hvala vam na porudžbini! Primili smo je i uskoro ćemo vam se javiti radi potvrde i dogovora o isporuci.",
+    "hvala vam na porudžbini! Primili smo je i uskoro ćemo vam se javiti radi potvrde. Pošiljku šaljemo kurirskom službom, a cenu dostave obračunava kurir prema svom cenovniku.",
     "",
     ...o.rows.map((r) => `${r.qty} × ${r.title} – ${r.price}`),
     "",
-    `Ukupno: ${o.total} (plaćanje pouzećem)`,
-    `Adresa isporuke: ${o.address}`,
+    `Ukupno: ${o.total} (${o.payment})`,
+    `Adresa isporuke: ${o.address} (kurirska služba)`,
     "",
     `Pitanja? ${SHOP.phone} · ${SHOP.email}`,
     "",
@@ -59,7 +60,7 @@ export function customerConfirmationHtml(o: OrderMail): string {
       </h1>
       <div style="margin:22px auto 0;width:40px;height:1px;background:${gold};"></div>
       <p style="margin:22px 0 0;font-family:${sans};font-size:15px;line-height:1.7;color:#9b9084;">
-        Primili smo vašu porudžbinu. <strong style="color:#f4ede2;">Uskoro ćemo vam se javiti</strong> radi potvrde i dogovora o isporuci.
+        Primili smo vašu porudžbinu. <strong style="color:#f4ede2;">Uskoro ćemo vam se javiti</strong> radi potvrde. Pošiljku šaljemo <strong style="color:#f4ede2;">kurirskom službom</strong>, a cenu dostave obračunava kurir prema svom cenovniku.
       </p>
     </td></tr>
     <tr><td style="padding:28px 32px 0;">
@@ -69,7 +70,7 @@ export function customerConfirmationHtml(o: OrderMail): string {
           <td style="padding:20px 0 0;font-family:${sans};font-size:11px;letter-spacing:3px;text-transform:uppercase;color:${gold};">Ukupno</td>
           <td align="right" style="padding:20px 0 0;font-family:${serif};font-size:26px;color:#f4ede2;">${esc(o.total)}</td>
         </tr>
-        <tr><td colspan="2" style="padding-top:6px;font-family:${sans};font-size:12px;color:#9b9084;">Plaćanje pouzećem</td></tr>
+        <tr><td colspan="2" style="padding-top:6px;font-family:${sans};font-size:12px;color:#9b9084;">${esc(o.payment)}</td></tr>
       </table>
     </td></tr>
     <tr><td style="padding:28px 32px 0;">

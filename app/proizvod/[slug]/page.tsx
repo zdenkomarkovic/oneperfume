@@ -4,15 +4,12 @@ import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/shop/AddToCart";
 import { Gallery } from "@/components/shop/Gallery";
 import { ProductCard } from "@/components/shop/ProductCard";
-import { genderLabels, getProduct, priceLabel, products, related, SHOP } from "@/lib/products";
-
-export function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
-}
+import { getCategories, getProduct, getRelated } from "@/lib/catalog";
+import { priceLabel, SHOP, toCartProduct } from "@/lib/products";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const p = getProduct(slug);
+  const p = await getProduct(slug);
   if (!p) return {};
   return {
     title: `${p.brand} ${p.name} ${p.volume}`,
@@ -23,14 +20,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const p = getProduct(slug);
+  const p = await getProduct(slug);
   if (!p) notFound();
+  const genderName = (await getCategories()).find((c) => c.slug === p.gender)?.name ?? p.gender;
+  const relatedProducts = await getRelated(p);
 
   const images = p.images;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: `${p.brand} ${p.name}`,
+    ...(p.sku && { sku: p.sku }),
     brand: { "@type": "Brand", name: p.brand },
     image: images,
     offers: {
@@ -46,7 +46,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <nav className="mb-8 text-xs uppercase tracking-[0.18em] text-muted" aria-label="Breadcrumb">
         <Link href="/" className="hover:text-gold">Početna</Link> /{" "}
-        <Link href={`/parfemi/${p.gender}`} className="hover:text-gold">{genderLabels[p.gender]}</Link> / <span className="text-ink">{p.name}</span>
+        <Link href={`/parfemi/${p.gender}`} className="hover:text-gold">{genderName}</Link> / <span className="text-ink">{p.name}</span>
       </nav>
 
       <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
@@ -60,7 +60,13 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           <div className="mt-4 flex items-center gap-4 text-sm text-muted">
             <span>{p.volume}</span>
             <span>·</span>
-            <span>{genderLabels[p.gender]}</span>
+            <span>{genderName}</span>
+            {p.sku && (
+              <>
+                <span>·</span>
+                <span>Šifra: {p.sku}</span>
+              </>
+            )}
             {p.rating ? (
               <>
                 <span>·</span>
@@ -72,11 +78,10 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           {!p.variants && <p className="mt-8 font-serif text-4xl">{priceLabel(p)}</p>}
 
           <div className="mt-8 max-w-md">
-            <AddToCart slug={p.slug} soldOut={p.soldOut} variants={p.variants} />
+            <AddToCart product={toCartProduct(p)} soldOut={p.soldOut} />
           </div>
 
           <ul className="mt-10 space-y-3 border-t border-line pt-8 text-sm text-ink/80">
-            <li>✦ Prodavnica u Leskovcu, Janka Veselinovića 3</li>
             <li>✦ Pitanja o mirisu? Pozovite {SHOP.phone}</li>
           </ul>
 
@@ -113,7 +118,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
       <section className="mt-28">
         <h2 className="mb-10 font-serif text-4xl">Možda će vam se svideti</h2>
         <div className="grid grid-cols-2 gap-x-5 gap-y-12 lg:grid-cols-4">
-          {related(p).map((r) => (
+          {relatedProducts.map((r) => (
             <ProductCard key={r.slug} product={r} />
           ))}
         </div>

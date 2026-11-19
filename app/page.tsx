@@ -4,7 +4,8 @@ import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { SITE_URL } from "@/lib/constants";
-import { SHOP, bestSellers, brandSlug, brands, getProduct, products } from "@/lib/products";
+import { getBestSellers, getBrands, getProducts } from "@/lib/catalog";
+import { SHOP, brandSlug } from "@/lib/products";
 
 export const metadata: Metadata = {
   title: { absolute: "Parfimerija Leskovac – parfemi Armaf, Lattafa, Afnan | One Perfume" },
@@ -35,16 +36,9 @@ const jsonLd = {
 };
 
 const categories = [
-  { href: "/parfemi/muski", title: "Muški", sub: "Drvenasti, začinski, sveži", slug: "armaf-club-de-nuit-lion-heart-men-100ml" },
-  { href: "/parfemi/zenski", title: "Ženski", sub: "Cvetni, voćni, slatki", slug: "armaf-club-de-nuit-maleka-luksuzan-zenski-parfem-koji-spaja-svezinu-citrusa-cvetne-note-i-toplinu-vanile-elegantan-i-postojan-miris" },
-  { href: "/parfemi/unisex", title: "Unisex", sub: "Za sve one bez pravila", slug: "lattafa-khamrah-100ml" },
-];
-
-const perks = [
-  ["Pažljiv izbor", "Poznati i nišni brendovi na jednom mestu"],
-  ["Za svaku priliku", "Muški, ženski, unisex parfemi i setovi"],
-  ["Online porudžbina", "Poručite iz fotelje, javljamo se radi potvrde"],
-  ["Lična podrška", "Pozovite nas ili pišite – savetujemo"],
+  { cat: "muski", href: "/parfemi/muski", title: "Muški", sub: "Drvenasti, začinski, sveži", slug: "armaf-club-de-nuit-lion-heart-men-100ml" },
+  { cat: "zenski", href: "/parfemi/zenski", title: "Ženski", sub: "Cvetni, voćni, slatki", slug: "armaf-club-de-nuit-maleka-luksuzan-zenski-parfem-koji-spaja-svezinu-citrusa-cvetne-note-i-toplinu-vanile-elegantan-i-postojan-miris" },
+  { cat: "unisex", href: "/parfemi/unisex", title: "Unisex", sub: "Za sve one bez pravila", slug: "lattafa-khamrah-100ml" },
 ];
 
 const sparkles = [
@@ -62,7 +56,8 @@ const heroNotes = [
   { t: "Bergamot", c: "right-[4%] bottom-[18%]", d: "3.6s" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [brands, products, bestSellers] = await Promise.all([getBrands(), getProducts(), getBestSellers()]);
   const marquee = [...brands, ...brands];
 
   return (
@@ -124,7 +119,7 @@ export default function HomePage() {
         <div className="marquee flex w-max gap-14 whitespace-nowrap font-serif text-3xl">
           {marquee.map((b, i) => (
             <Link key={i} href={`/parfemi?brend=${encodeURIComponent(b)}`} className="transition-opacity hover:opacity-60">
-              {b} <span className="ml-14 opacity-50">✦</span>
+              {b} <span className="ml-14 opacity-50">—</span>
             </Link>
           ))}
         </div>
@@ -134,7 +129,8 @@ export default function HomePage() {
       <section className="container-x mt-28">
         <div className="grid gap-5 md:grid-cols-3">
           {categories.map((c, i) => {
-            const p = getProduct(c.slug)!;
+            const p = products.find((x) => x.slug === c.slug) ?? products.find((x) => x.gender === c.cat && x.image);
+            if (!p) return null;
             return (
               <Reveal key={c.href} delay={i * 120}>
               <Link href={c.href} className="group relative flex aspect-[4/5] items-end overflow-hidden bg-surface-2 p-8">
@@ -167,28 +163,13 @@ export default function HomePage() {
         </div>
         </Reveal>
         <div className="grid grid-cols-2 gap-x-5 gap-y-12 lg:grid-cols-4">
-          {bestSellers().slice(0, 8).map((p, i) => (
+          {bestSellers.slice(0, 8).map((p, i) => (
             <Reveal key={p.slug} delay={(i % 4) * 100}>
               <ProductCard product={p} />
             </Reveal>
           ))}
         </div>
        </div>
-      </section>
-
-      {/* Perks */}
-      <section className="bg-paper py-20 text-bg">
-        <div className="container-x grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          {perks.map(([t, d], i) => (
-            <Reveal key={t} delay={i * 120}>
-            <div className="border-t border-bg/20 pt-6">
-              <span className="font-serif text-5xl text-bg/25">0{i + 1}</span>
-              <h3 className="mt-3 font-serif text-2xl">{t}</h3>
-              <p className="mt-2 text-sm text-bg/60">{d}</p>
-            </div>
-            </Reveal>
-          ))}
-        </div>
       </section>
 
       {/* Brands */}

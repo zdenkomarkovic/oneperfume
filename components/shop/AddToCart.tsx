@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useCart } from "./CartProvider";
-import { formatPrice, type Variant } from "@/lib/products";
+import { formatPrice, type CartProduct } from "@/lib/products";
 
-export function AddToCart({ slug, soldOut, variants }: { slug: string; soldOut?: boolean; variants?: Variant[] }) {
+export function AddToCart({ product, soldOut }: { product: CartProduct; soldOut?: boolean }) {
+  const variants = product.variants;
   const { add } = useCart();
   const [qty, setQty] = useState(1);
   const [variant, setVariant] = useState(variants?.[0]?.label);
@@ -35,7 +36,7 @@ export function AddToCart({ slug, soldOut, variants }: { slug: string; soldOut?:
           <span className="w-8 text-center text-sm">{qty}</span>
           <button className="px-4 py-3 hover:text-gold" onClick={() => setQty((q) => Math.min(20, q + 1))} aria-label="Povećaj">+</button>
         </div>
-        <button className="btn btn-gold flex-1" onClick={() => add(slug, qty, variant)}>
+        <button className="btn btn-gold flex-1" onClick={() => add(product, qty, variant)}>
           Dodaj u korpu{price ? ` · ${formatPrice(price * qty)}` : ""}
         </button>
       </div>

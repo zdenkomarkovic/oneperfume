@@ -9,11 +9,15 @@
     "lint": "next lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:setup": "node --env-file=.env.local scripts/db-setup.mjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.18",
+    "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
+    "jose": "^6.2.17",
+    "mysql2": "^3.24.6",
     "next": "^15.1.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

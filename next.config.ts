@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Upload slika proizvoda ide kroz server akciju.
+  experimental: { serverActions: { bodySizeLimit: "30mb" } },
   async headers() {
     return [
       {

@@ -331,3 +331,35 @@ a:hover > .arrow-slide, .group:hover .arrow-slide { transform: translateX(6px); 
 .pg:disabled { opacity: 0.3; cursor: not-allowed; }
 .pg-on { background: var(--color-gold); color: #0c0a09; border-color: var(--color-gold); }
 .pg-on:hover:not(:disabled) { color: #0c0a09 !important; }
+
+/* Admin panel – svetla tema (ne prati izgled sajta). Prepisuje iste promenljive samo unutar .admin-light */
+.admin-light {
+  --color-bg: #f6f5f3;
+  --color-surface: #ffffff;
+  --color-surface-2: #efede9;
+  --color-line: #dedad3;
+  --color-ink: #1c1917;
+  --color-muted: #6b655e;
+  --color-gold: #1d4ed8;
+  --color-gold-soft: #1e40af;
+  --color-red-300: #b91c1c;
+  --color-red-400: #dc2626;
+  --color-emerald-300: #047857;
+  --color-emerald-400: #059669;
+  --color-amber-300: #b45309;
+  --color-amber-400: #d97706;
+  --color-sky-300: #0369a1;
+  --color-sky-400: #0284c7;
+  --color-violet-300: #6d28d9;
+  --color-violet-400: #7c3aed;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+.admin-light .btn-gold { color: #fff; }
+.admin-light .btn-gold:hover { background: var(--color-gold-soft); border-color: var(--color-gold-soft); }
+.admin-light .btn-ghost:hover { background: var(--color-gold); color: #fff; }
+.admin-light .field::placeholder { color: #a39d94; }
+.admin-light .pg-on, .admin-light .pg-on:hover:not(:disabled) { color: #fff !important; }
+.admin-light .bg-gold { color: #fff; }
+.admin-light h1, .admin-light h2 { color: #1c1917; }

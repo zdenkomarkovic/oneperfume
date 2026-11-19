@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Catalog } from "@/components/shop/Catalog";
-import { products } from "@/lib/products";
+import { getProducts } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Parfemi",
@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ brend?: string }> }) {
   const { brend } = await searchParams;
+  const products = await getProducts();
   return (
     <div className="container-x pt-16">
       <p className="eyebrow">Kolekcija</p>

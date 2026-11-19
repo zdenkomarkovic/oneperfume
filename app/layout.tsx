@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { CartProvider } from "@/components/shop/CartProvider";
-import { CartDrawer } from "@/components/shop/CartDrawer";
+import { SiteShell } from "@/components/layout/SiteShell";
+import { getCategories } from "@/lib/catalog";
+
+// Katalog dolazi iz baze – stranice se ne prave u build-u.
+export const dynamic = "force-dynamic";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin", "latin-ext"],
@@ -22,16 +23,12 @@ export const metadata: Metadata = {
   openGraph: { type: "website", locale: "sr_RS", url: SITE_URL, siteName: SITE_NAME },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const categories = await getCategories().catch(() => []);
   return (
     <html lang="sr" className={`${cormorant.variable} ${manrope.variable}`}>
       <body>
-        <CartProvider>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-          <CartDrawer />
-        </CartProvider>
+        <SiteShell categories={categories}>{children}</SiteShell>
       </body>
     </html>
   );

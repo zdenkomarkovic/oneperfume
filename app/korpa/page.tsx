@@ -50,7 +50,7 @@ export default function CartPage() {
             <h2 className="font-serif text-3xl">Pregled</h2>
             <div className="mt-6 space-y-3 text-sm">
               <div className="flex justify-between"><span className="text-muted">Međuzbir</span><span>{formatPrice(total)}</span></div>
-              <div className="flex justify-between"><span className="text-muted">Dostava</span><span>Obračunava se pri slanju</span></div>
+              <div className="flex justify-between"><span className="text-muted">Dostava</span><span className="text-right">Kurirska služba, cenu obračunava kurir</span></div>
             </div>
             <div className="mt-6 flex items-baseline justify-between border-t border-line pt-6">
               <span className="eyebrow !text-muted">Ukupno</span>

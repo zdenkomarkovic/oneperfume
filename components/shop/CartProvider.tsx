@@ -1,17 +1,18 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { getProduct, unitPrice, type Product } from "@/lib/products";
+import { unitPrice, type CartProduct } from "@/lib/products";
 
 interface CartLine {
   slug: string;
   qty: number;
   variant?: string;
+  product: CartProduct; // snimak proizvoda (cena se na serveru ponovo računa)
 }
 
 export interface CartItem {
   key: string;
-  product: Product;
+  product: CartProduct;
   variant?: string;
   price: number;
   qty: number;
@@ -23,7 +24,7 @@ interface CartCtx {
   total: number;
   open: boolean;
   setOpen: (v: boolean) => void;
-  add: (slug: string, qty?: number, variant?: string) => void;
+  add: (product: CartProduct, qty?: number, variant?: string) => void;
   setQty: (key: string, qty: number) => void;
   remove: (key: string) => void;
   clear: () => void;
@@ -42,7 +43,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const s = localStorage.getItem(KEY);
-      if (s) setRaw(JSON.parse(s));
+      if (s) setRaw((JSON.parse(s) as CartLine[]).filter((l) => l?.product?.slug));
     } catch {}
     setReady(true);
   }, []);
@@ -54,12 +55,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, [raw, ready]);
 
-  const add = useCallback((slug: string, qty = 1, variant?: string) => {
+  const add = useCallback((product: CartProduct, qty = 1, variant?: string) => {
+    const slug = product.slug;
     setRaw((prev) => {
       const k = keyOf({ slug, variant });
       const ex = prev.find((l) => keyOf(l) === k);
       if (ex) return prev.map((l) => (keyOf(l) === k ? { ...l, qty: Math.min(l.qty + qty, 20) } : l));
-      return [...prev, { slug, qty, variant }];
+      return [...prev, { slug, qty, variant, product }];
     });
     setOpen(true);
   }, []);
@@ -75,9 +77,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<CartCtx>(() => {
     const lines: CartItem[] = [];
     for (const l of raw) {
-      const product = getProduct(l.slug);
-      if (!product || product.soldOut) continue;
-      lines.push({ key: keyOf(l), product, variant: l.variant, price: unitPrice(product, l.variant), qty: l.qty });
+      lines.push({ key: keyOf(l), product: l.product, variant: l.variant, price: unitPrice(l.product, l.variant), qty: l.qty });
     }
     return {
       lines,

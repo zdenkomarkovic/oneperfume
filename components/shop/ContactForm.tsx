@@ -8,11 +8,12 @@ export function ContactForm() {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setState("sending");
-    const data = Object.fromEntries(new FormData(e.currentTarget));
+    const form = e.currentTarget;
+    const data = Object.fromEntries(new FormData(form));
     try {
       const r = await fetch("/api/kontakt", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
       setState(r.ok ? "ok" : "err");
-      if (r.ok) e.currentTarget.reset();
+      if (r.ok) form.reset();
     } catch {
       setState("err");
     }

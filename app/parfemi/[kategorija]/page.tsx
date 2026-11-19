@@ -1,23 +1,19 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Catalog } from "@/components/shop/Catalog";
-import { categoryLabels, products } from "@/lib/products";
-
-export function generateStaticParams() {
-  return Object.keys(categoryLabels).map((kategorija) => ({ kategorija }));
-}
+import { getCategories, getProducts } from "@/lib/catalog";
 
 export async function generateMetadata({ params }: { params: Promise<{ kategorija: string }> }): Promise<Metadata> {
   const { kategorija } = await params;
-  const label = categoryLabels[kategorija];
+  const label = (await getCategories()).find((c) => c.slug === kategorija)?.name;
   return { title: label ?? "Parfemi", description: label ? `${label}` : undefined };
 }
 
 export default async function Page({ params }: { params: Promise<{ kategorija: string }> }) {
   const { kategorija } = await params;
-  const label = categoryLabels[kategorija];
+  const label = (await getCategories()).find((c) => c.slug === kategorija)?.name;
   if (!label) notFound();
-  const list = products.filter((p) => p.categories.includes(kategorija));
+  const list = (await getProducts()).filter((p) => p.categories.includes(kategorija));
   return (
     <div className="container-x pt-16">
       <p className="eyebrow">Kolekcija</p>

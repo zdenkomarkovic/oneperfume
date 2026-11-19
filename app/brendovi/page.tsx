@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { brands, products } from "@/lib/products";
+import { getBrands, getProducts } from "@/lib/catalog";
 
 export const metadata: Metadata = { title: "Brendovi", description: "Brendovi u ponudi One Perfume prodavnice." };
 
-export default function Page() {
+export default async function Page() {
+  const [brands, products] = await Promise.all([getBrands(), getProducts()]);
   return (
     <div className="container-x pt-16">
       <p className="eyebrow">Kolekcija</p>

@@ -1,7 +1,7 @@
-import data from "./products-data.json";
+// Tipovi i pomoćne funkcije bezbedne za klijent i server.
+// Podaci o proizvodima se čitaju iz MariaDB – vidi lib/catalog.ts.
 
 export type Gender = "muski" | "zenski" | "unisex";
-export type CategoryKey = Gender | "zenski-setovi" | "muski-setovi";
 
 export interface Variant {
   label: string;
@@ -9,62 +9,57 @@ export interface Variant {
 }
 
 export interface Product {
+  id: number;
   slug: string;
+  sku?: string; // šifra (opciono)
   name: string;
   brand: string;
   price: number; // RSD
   volume: string;
   gender: Gender;
-  categories: string[];
+  categories: string[]; // slug-ovi kategorija
   images: string[];
   image: string;
   soldOut?: boolean;
   bestSeller?: boolean;
   rating?: number;
-  reviewCount?: number;
   description?: string[];
   notes?: { top: string[]; heart: string[]; base: string[] };
   variants?: Variant[];
   set?: boolean;
 }
 
-type Raw = Omit<Product, "image" | "bestSeller" | "gender"> & { gender: string };
+export interface Category {
+  id: number;
+  slug: string;
+  name: string;
+  sortOrder: number;
+}
 
-// Podaci su preuzeti sa oneperfume.rs (scripts/build-products.mjs -> lib/products-data.json)
-export const products: Product[] = (data as unknown as Raw[]).map((p, i) => ({
-  ...p,
-  gender: p.gender as Gender,
-  image: p.images[0] ?? "",
-  bestSeller: i < 8,
-}));
+/** Minimalni snimak proizvoda koji se čuva u korpi (localStorage). */
+export type CartProduct = Pick<Product, "slug" | "name" | "brand" | "image" | "volume" | "price" | "variants">;
 
-export const brands = Array.from(new Set(products.map((p) => p.brand))).sort();
+export const toCartProduct = (p: Product): CartProduct => ({
+  slug: p.slug,
+  name: p.name,
+  brand: p.brand,
+  image: p.image,
+  volume: p.volume,
+  price: p.price,
+  variants: p.variants,
+});
 
-export const categoryLabels: Record<string, string> = {
-  muski: "Muški parfemi",
-  zenski: "Ženski parfemi",
-  unisex: "Unisex",
-  "zenski-setovi": "Ženski setovi",
-};
-export const genderLabels = categoryLabels;
-
-export const getProduct = (slug: string) => products.find((p) => p.slug === slug);
-export const bestSellers = () => products.filter((p) => p.bestSeller);
-export const related = (p: Product, n = 4) =>
-  products
-    .filter((x) => x.slug !== p.slug && !x.soldOut && (x.brand === p.brand || x.gender === p.gender))
-    .sort((a, b) => Number(b.brand === p.brand) - Number(a.brand === p.brand))
-    .slice(0, n);
 export const brandSlug = (b: string) => b.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
 export const formatPrice = (n: number) => new Intl.NumberFormat("sr-RS").format(n) + " RSD";
 
-export const maxPrice = (p: Product) => (p.variants ? Math.max(...p.variants.map((v) => v.price)) : p.price);
-export const priceLabel = (p: Product) =>
+export const maxPrice = (p: Pick<Product, "price" | "variants">) =>
+  p.variants?.length ? Math.max(...p.variants.map((v) => v.price)) : p.price;
+export const priceLabel = (p: Pick<Product, "price" | "variants">) =>
   maxPrice(p) !== p.price ? `${formatPrice(p.price)} – ${formatPrice(maxPrice(p))}` : formatPrice(p.price);
 
 /** Cena za konkretnu varijantu (ili osnovna ako nema varijante). */
-export const unitPrice = (p: Product, variant?: string) =>
+export const unitPrice = (p: Pick<Product, "price" | "variants">, variant?: string) =>
   p.variants?.find((v) => v.label === variant)?.price ?? p.price;
 
 export const SHOP = {

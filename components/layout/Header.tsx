@@ -4,19 +4,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "@/components/shop/CartProvider";
+import type { Category } from "@/lib/products";
 
-const nav = [
-  { href: "/parfemi", label: "Parfemi" },
-  { href: "/parfemi/muski", label: "Muški" },
-  { href: "/parfemi/zenski", label: "Ženski" },
-  { href: "/parfemi/unisex", label: "Unisex" },
-  { href: "/parfemi/zenski-setovi", label: "Setovi" },
-  { href: "/brendovi", label: "Brendovi" },
-  { href: "/o-nama", label: "O nama" },
-  { href: "/kontakt", label: "Kontakt" },
-];
-
-export function Header() {
+export function Header({ categories }: { categories: Category[] }) {
+  const nav = [
+    { href: "/parfemi", label: "Parfemi" },
+    ...categories.map((c) => ({ href: `/parfemi/${c.slug}`, label: c.name.replace(/\s*parfemi$/i, "") })),
+    { href: "/brendovi", label: "Brendovi" },
+    { href: "/o-nama", label: "O nama" },
+    { href: "/kontakt", label: "Kontakt" },
+  ];
   const { count, setOpen } = useCart();
   const [menu, setMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -30,9 +27,6 @@ export function Header() {
 
   return (
     <>
-      <div className="bg-gold py-2 text-center text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-bg">
-        One Perfume · Leskovac · Pon–Sub 09–17h · +381 62 488 248
-      </div>
       <header
         className={`sticky top-0 z-50 border-b transition-colors duration-300 ${
           scrolled ? "border-line bg-bg/90 backdrop-blur-md" : "border-transparent bg-bg"
