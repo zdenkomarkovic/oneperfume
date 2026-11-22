@@ -6,9 +6,9 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      // Disallow admin i privatne stranice:
-      // disallow: ["/admin/", "/api/"],
+      disallow: ["/admin", "/api/", "/korpa", "/porudzbina", "/placanje/"],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
+    host: SITE_URL,
   };
 }

@@ -4,7 +4,7 @@ import { z } from "zod";
 // Dodaj ovde sve env varijable koje projekat koristi
 
 const envSchema = z.object({
-  NEXT_PUBLIC_SITE_URL: z.string().url().default("http://localhost:3000"),
+  NEXT_PUBLIC_SITE_URL: z.string().url().default("https://oneperfume.rs"),
   NEXT_PUBLIC_SITE_NAME: z.string().default("My Site"),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 

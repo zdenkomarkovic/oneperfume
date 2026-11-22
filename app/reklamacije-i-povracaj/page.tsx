@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LegalPage, Sec } from "@/components/legal/LegalPage";
 import { SHOP } from "@/lib/products";
 
-export const metadata: Metadata = { title: "Reklamacije i povraćaj", description: "Pravo na odustanak, povraćaj robe i reklamacije." };
+export const metadata: Metadata = { title: "Reklamacije i povraćaj", description: "Pravo na odustanak, povraćaj robe i reklamacije.", alternates: { canonical: "/reklamacije-i-povracaj" } };
 
 export default function Page() {
   return (

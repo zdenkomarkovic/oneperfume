@@ -2,10 +2,10 @@
 // Ove vrednosti se koriste za SEO, metadata, itd.
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  (process.env.NEXT_PUBLIC_SITE_URL ?? "https://oneperfume.rs").replace(/\/+$/, "");
 
 export const SITE_NAME =
-  process.env.NEXT_PUBLIC_SITE_NAME ?? "My Site";
+  process.env.NEXT_PUBLIC_SITE_NAME ?? "One Perfume";
 
 // Dodaj ostale konstante koje su specifične za projekat
 // export const SITE_DESCRIPTION = "";

@@ -10,6 +10,9 @@ import { exec, query, tx } from "@/lib/db";
 import { createSession, destroySession, requireAdmin } from "@/lib/auth";
 import { ORDER_STATUSES, PAYMENT_STATUSES } from "@/lib/order-status";
 import { deleteUpload, saveUpload } from "@/lib/uploads";
+import { createHash, randomBytes } from "node:crypto";
+import { sendMail } from "@/lib/mail";
+import { SITE_URL } from "@/lib/constants";
 
 export interface FormState {
   error?: string;
@@ -69,6 +72,99 @@ export async function changePasswordAction(_: FormState, fd: FormData): Promise<
   if (!a || !(await bcrypt.compare(cur, a.password_hash))) return { error: "Trenutna lozinka nije ispravna." };
   await exec("UPDATE admins SET password_hash = ? WHERE id = ?", [await bcrypt.hash(next, 11), s.id]);
   return { ok: "Lozinka je promenjena." };
+}
+
+// ─── Reset lozinke i upravljanje administratorima ───────────────────────────
+
+const sha = (s: string) => createHash("sha256").update(s).digest("hex");
+const RESET_TTL_MIN = 60;
+let resetTable: Promise<unknown> | null = null;
+/** Tabela se pravi i ovde, da radi i na bazi koja je postavljena pre ove funkcije. */
+const ensureResetTable = () =>
+  (resetTable ??= exec(`CREATE TABLE IF NOT EXISTS admin_resets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    admin_id INT NOT NULL,
+    token_hash CHAR(64) NOT NULL UNIQUE,
+    expires_at DATETIME NOT NULL,
+    FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB`).catch((e) => {
+    resetTable = null;
+    throw e;
+  }));
+
+const resetAttempts = new Map<string, { n: number; until: number }>();
+
+export async function forgotPasswordAction(_: FormState, fd: FormData): Promise<FormState> {
+  const email = String(fd.get("email") ?? "").trim().toLowerCase();
+  const generic: FormState = { ok: "Ako nalog sa tom adresom postoji, poslali smo link za promenu lozinke. Link važi 1 sat." };
+  if (!z.string().email().safeParse(email).success) return { error: "Unesite ispravnu email adresu." };
+
+  const h = await headers();
+  const key = `${h.get("x-forwarded-for") ?? "local"}`;
+  const a = resetAttempts.get(key);
+  const live = a && a.until > Date.now();
+  if (live && a.n >= 5) return { error: "Previše zahteva. Pokušajte ponovo kasnije." };
+  resetAttempts.set(key, { n: (live ? a.n : 0) + 1, until: live ? a.until : Date.now() + 15 * 60_000 });
+
+  await ensureResetTable();
+  const [admin] = await query<{ id: number; email: string }>("SELECT id, email FROM admins WHERE email = ?", [email]);
+  if (!admin) return generic;
+
+  const token = randomBytes(32).toString("hex");
+  await exec("DELETE FROM admin_resets WHERE admin_id = ? OR expires_at < NOW()", [admin.id]);
+  await exec("INSERT INTO admin_resets (admin_id, token_hash, expires_at) VALUES (?,?, DATE_ADD(NOW(), INTERVAL ? MINUTE))", [admin.id, sha(token), RESET_TTL_MIN]);
+
+  const link = `${SITE_URL}/admin/reset-lozinke?token=${token}`;
+  await sendMail(
+    "One Perfume – promena lozinke",
+    `Primili smo zahtev za promenu lozinke za admin panel.
+
+Kliknite na link (važi ${RESET_TTL_MIN} minuta):
+${link}
+
+Ako niste Vi tražili promenu, slobodno ignorišite ovu poruku.`,
+    undefined,
+    { to: admin.email },
+  ).catch(() => false);
+  return generic;
+}
+
+export async function resetPasswordAction(_: FormState, fd: FormData): Promise<FormState> {
+  const token = String(fd.get("token") ?? "");
+  const next = String(fd.get("next") ?? "");
+  if (next.length < 8) return { error: "Nova lozinka mora imati bar 8 karaktera." };
+  if (next !== String(fd.get("repeat") ?? "")) return { error: "Lozinke se ne poklapaju." };
+  await ensureResetTable();
+  const [r] = await query<{ id: number; admin_id: number }>("SELECT id, admin_id FROM admin_resets WHERE token_hash = ? AND expires_at > NOW()", [sha(token)]);
+  if (!r) return { error: "Link je neispravan ili je istekao. Zatražite novi." };
+  await tx(async (c) => {
+    await c.query("UPDATE admins SET password_hash = ? WHERE id = ?", [await bcrypt.hash(next, 11), r.admin_id]);
+    await c.query("DELETE FROM admin_resets WHERE admin_id = ?", [r.admin_id]);
+  });
+  redirect("/admin/login?reset=1");
+}
+
+export async function addAdminAction(_: FormState, fd: FormData): Promise<FormState> {
+  await requireAdmin();
+  const email = String(fd.get("email") ?? "").trim().toLowerCase();
+  const password = String(fd.get("password") ?? "");
+  if (!z.string().email().max(150).safeParse(email).success) return { error: "Unesite ispravnu email adresu." };
+  if (password.length < 8) return { error: "Lozinka mora imati bar 8 karaktera." };
+  const [dup] = await query("SELECT id FROM admins WHERE email = ?", [email]);
+  if (dup) return { error: "Administrator sa tim emailom već postoji." };
+  await exec("INSERT INTO admins (email, password_hash) VALUES (?,?)", [email, await bcrypt.hash(password, 11)]);
+  revalidatePath("/admin/podesavanja");
+  return { ok: `Administrator ${email} je dodat.` };
+}
+
+export async function deleteAdminAction(fd: FormData) {
+  const s = await requireAdmin();
+  const id = Number(fd.get("id"));
+  if (!Number.isInteger(id) || id === s.id) return;
+  const [c] = await query<{ n: number }>("SELECT COUNT(*) n FROM admins");
+  if (Number(c?.n ?? 0) <= 1) return;
+  await exec("DELETE FROM admins WHERE id = ?", [id]);
+  revalidatePath("/admin/podesavanja");
 }
 
 // ─── Proizvodi ───────────────────────────────────────────────────────────────

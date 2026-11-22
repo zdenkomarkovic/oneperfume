@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getBrands, getProducts } from "@/lib/catalog";
 
-export const metadata: Metadata = { title: "Brendovi", description: "Brendovi u ponudi One Perfume prodavnice." };
+export const metadata: Metadata = { title: "Brendovi", description: "Brendovi parfema u ponudi One Perfume parfimerije u Leskovcu: Armaf, Lattafa, Afnan, Paris Corner, Al Haramain i drugi.", alternates: { canonical: "/brendovi" } };
 
 export default async function Page() {
   const [brands, products] = await Promise.all([getBrands(), getProducts()]);

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LegalPage, Sec } from "@/components/legal/LegalPage";
 import { SHOP } from "@/lib/products";
 
-export const metadata: Metadata = { title: "Isporuka i plaćanje", description: "Načini plaćanja, rokovi i troškovi isporuke." };
+export const metadata: Metadata = { title: "Isporuka i plaćanje", description: "Načini plaćanja, rokovi i troškovi isporuke.", alternates: { canonical: "/isporuka-i-placanje" } };
 
 export default function Page() {
   return (

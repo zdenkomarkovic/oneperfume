@@ -3,7 +3,7 @@ import Link from "next/link";
 import { LegalPage, Sec } from "@/components/legal/LegalPage";
 import { SHOP } from "@/lib/products";
 
-export const metadata: Metadata = { title: "Politika privatnosti", description: "Kako One Perfume obrađuje i štiti podatke o ličnosti." };
+export const metadata: Metadata = { title: "Politika privatnosti", description: "Kako One Perfume obrađuje i štiti podatke o ličnosti.", alternates: { canonical: "/politika-privatnosti" } };
 
 export default function Page() {
   return (

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage, Sec } from "@/components/legal/LegalPage";
 
-export const metadata: Metadata = { title: "Politika kolačića", description: "Informacije o kolačićima na sajtu One Perfume." };
+export const metadata: Metadata = { title: "Politika kolačića", description: "Informacije o kolačićima na sajtu One Perfume.", alternates: { canonical: "/politika-kolacica" } };
 
 export default function Page() {
   return (

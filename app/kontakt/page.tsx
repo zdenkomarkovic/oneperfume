@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ContactForm } from "@/components/shop/ContactForm";
 import { SHOP } from "@/lib/products";
 
-export const metadata: Metadata = { title: "Kontakt", description: "Kontaktirajte One Perfume – Leskovac." };
+export const metadata: Metadata = { title: "Kontakt", description: "Kontaktirajte One Perfume – parfimerija u Leskovcu, Janka Veselinovića 3. Telefon +381 62 488 248, radno vreme i lokacija.", alternates: { canonical: "/kontakt" } };
 
 export default function Page() {
   return (

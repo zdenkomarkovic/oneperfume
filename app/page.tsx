@@ -19,7 +19,12 @@ const jsonLd = {
   "@type": "PerfumeStore",
   name: "One Perfume",
   description: "Parfimerija u Leskovcu – muški, ženski i unisex parfemi.",
+  "@id": `${SITE_URL}/#store`,
   url: SITE_URL,
+  image: `${SITE_URL}/logo-dark.png`,
+  logo: `${SITE_URL}/logo-dark.png`,
+  priceRange: "RSD",
+  areaServed: "RS",
   telephone: SHOP.phone,
   email: SHOP.email,
   address: {

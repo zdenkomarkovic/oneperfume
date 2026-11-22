@@ -6,7 +6,12 @@ import { getCategories, getProducts } from "@/lib/catalog";
 export async function generateMetadata({ params }: { params: Promise<{ kategorija: string }> }): Promise<Metadata> {
   const { kategorija } = await params;
   const label = (await getCategories()).find((c) => c.slug === kategorija)?.name;
-  return { title: label ?? "Parfemi", description: label ? `${label}` : undefined };
+  if (!label) return { title: "Parfemi", robots: { index: false, follow: false } };
+  return {
+    title: `${label} parfemi`,
+    description: `${label} parfemi – originalni mirisi Armaf, Lattafa, Afnan i drugih brendova. One Perfume parfimerija Leskovac, dostava širom Srbije.`,
+    alternates: { canonical: `/parfemi/${kategorija}` },
+  };
 }
 
 export default async function Page({ params }: { params: Promise<{ kategorija: string }> }) {

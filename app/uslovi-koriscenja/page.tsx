@@ -3,7 +3,7 @@ import Link from "next/link";
 import { LegalPage, Sec } from "@/components/legal/LegalPage";
 import { SHOP } from "@/lib/products";
 
-export const metadata: Metadata = { title: "Uslovi korišćenja", description: "Opšti uslovi korišćenja i kupovine na sajtu One Perfume." };
+export const metadata: Metadata = { title: "Uslovi korišćenja", description: "Opšti uslovi korišćenja i kupovine na sajtu One Perfume.", alternates: { canonical: "/uslovi-koriscenja" } };
 
 export default function Page() {
   return (

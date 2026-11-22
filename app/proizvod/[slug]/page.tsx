@@ -5,16 +5,30 @@ import { AddToCart } from "@/components/shop/AddToCart";
 import { Gallery } from "@/components/shop/Gallery";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { getCategories, getProduct, getRelated } from "@/lib/catalog";
-import { priceLabel, SHOP, toCartProduct } from "@/lib/products";
+import { SITE_URL } from "@/lib/constants";
+import { maxPrice, priceLabel, SHOP, toCartProduct } from "@/lib/products";
+
+const abs = (u: string) => (u.startsWith("http") ? u : SITE_URL + u);
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const p = await getProduct(slug);
   if (!p) return {};
+  const title = `${p.brand} ${p.name} ${p.volume}`;
+  const notes = p.notes ? ` Note: ${[...p.notes.top, ...p.notes.heart, ...p.notes.base].slice(0, 6).join(", ")}.` : "";
+  const description = `${p.brand} ${p.name} (${p.volume}) – ${priceLabel(p)}. Originalni parfem, poručite online uz dostavu širom Srbije – One Perfume Leskovac.${notes}`.slice(0, 300);
   return {
-    title: `${p.brand} ${p.name} ${p.volume}`,
-    description: `${p.brand} ${p.name} (${p.volume}) – ${priceLabel(p)}.`,
-    openGraph: { images: [p.image] },
+    title,
+    description,
+    alternates: { canonical: `/proizvod/${p.slug}` },
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: `/proizvod/${p.slug}`,
+      ...(p.image && { images: [{ url: p.image, alt: `${p.brand} ${p.name}` }] }),
+    },
+    twitter: { card: "summary_large_image", title, description, ...(p.image && { images: [p.image] }) },
   };
 }
 
@@ -26,24 +40,51 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const relatedProducts = await getRelated(p);
 
   const images = p.images;
+  const url = `${SITE_URL}/proizvod/${p.slug}`;
+  const availability = p.soldOut ? "https://schema.org/OutOfStock" : "https://schema.org/InStock";
+  const offerBase = {
+    "@type": "Offer",
+    priceCurrency: "RSD",
+    availability,
+    itemCondition: "https://schema.org/NewCondition",
+    url,
+    seller: { "@type": "Organization", name: SHOP.name },
+  };
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: `${p.brand} ${p.name}`,
+    name: `${p.brand} ${p.name} ${p.volume}`,
+    url,
     ...(p.sku && { sku: p.sku }),
+    ...(p.description?.length && { description: p.description.join(" ").slice(0, 5000) }),
     brand: { "@type": "Brand", name: p.brand },
-    image: images,
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "RSD",
-      price: p.price,
-      availability: p.soldOut ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
-    },
+    category: genderName,
+    image: images.map(abs),
+    offers: p.variants?.length
+      ? {
+          "@type": "AggregateOffer",
+          priceCurrency: "RSD",
+          lowPrice: Math.min(...p.variants.map((v) => v.price)),
+          highPrice: maxPrice(p),
+          offerCount: p.variants.length,
+          availability,
+          url,
+        }
+      : { ...offerBase, price: p.price },
+  };
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Početna", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: genderName, item: `${SITE_URL}/parfemi/${p.gender}` },
+      { "@type": "ListItem", position: 3, name: p.name, item: url },
+    ],
   };
 
   return (
     <div className="container-x pt-10">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([jsonLd, breadcrumbLd]) }} />
       <nav className="mb-8 text-xs uppercase tracking-[0.18em] text-muted" aria-label="Breadcrumb">
         <Link href="/" className="hover:text-gold">Početna</Link> /{" "}
         <Link href={`/parfemi/${p.gender}`} className="hover:text-gold">{genderName}</Link> / <span className="text-ink">{p.name}</span>

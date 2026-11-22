@@ -4,7 +4,8 @@ import { getProducts } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Parfemi",
-  description: "Kompletna ponuda muških, ženskih i unisex parfema.",
+  description: "Kompletna ponuda muških, ženskih i unisex parfema – Armaf, Lattafa, Afnan, Paris Corner, Al Haramain. Poručite online, dostava širom Srbije.",
+  alternates: { canonical: "/parfemi" },
 };
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ brend?: string }> }) {

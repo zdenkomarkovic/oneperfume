@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SHOP } from "@/lib/products";
 
-export const metadata: Metadata = { title: "O nama", description: "One Perfume – mirisom ispričana priča." };
+export const metadata: Metadata = { title: "O nama", description: "O nama – One Perfume, parfimerija u Leskovcu. Mirisom ispričana priča: originalni parfemi poznatih brendova.", alternates: { canonical: "/o-nama" } };
 
 export default function Page() {
   return (
